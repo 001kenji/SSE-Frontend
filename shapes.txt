@@ -1,0 +1,48 @@
+heart shape     import { FaHeart } from "react-icons/fa6";
+search          import { IoMdSearch } from "react-icons/io";
+bar             import { IoBarChartOutline } from "react-icons/io5";
+bell            import { LuBellRing } from "react-icons/lu";
+zoom            import { CiZoomIn } from "react-icons/ci";
+ZoomOut         import { MdZoomOutMap } from "react-icons/md";
+Moon            import { GiMoonClaws } from "react-icons/gi";
+Sun             import { IoSunnySharp } from "react-icons/io5";
+
+
+
+
+chartTypes = [
+    "line",
+    "area",
+    "spline",
+    "stepLine",
+    "column",
+    "splineArea",
+    "candlestick",
+    "ohlc"
+];
+
+
+chartThemes = [
+    "light1",
+    "light2",
+    "dark1",
+    "dark2"
+];
+
+
+
+
+const indicators = [
+    "SMA",
+    "EMA",
+    "Bollinger Bands",
+    "RSI",
+    "MACD",
+    "ATR",
+    "Stochastic Oscillator",
+    "Volume",
+    "OBV",
+    "Parabolic SAR"
+];
+
+

@@ -1,0 +1,142 @@
+## set  1
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://canvasjs.com/assets/script/canvasjs.stock.min.js"></script>
+</head>
+<body>
+  <div id="chartContainer" style="height: 600px; width: 100%;"></div>
+  <script>
+    const eventSource = new EventSource('/sse');
+    const chart = new CanvasJS.StockChart('chartContainer', {
+      title: {
+        text: 'Live StockChart with Server-Sent Events'
+      },
+      data: [{
+        type: 'line',
+        dataPoints: []
+      }]
+    });
+
+    eventSource.onmessage = (event) => {
+      const dataPoints = JSON.parse(event.data);
+      chart.data[0].dataPoints = dataPoints;
+      chart.render();
+    };
+  </script>
+</body>
+</html>
+
+### set  2
+
+##python code 
+    # views.py
+
+from django.http import StreamingHttpResponse
+import time
+import json
+
+def event_stream():
+    while True:
+        data = json.dumps({"x": time.time(), "y": get_live_data_point()})
+        yield f'data: {data}\n\n'
+        time.sleep(1)  # adjust time interval as needed
+
+def sse_view(request):
+    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    response['Cache-Control'] = 'no-cache'
+    return response
+
+def get_live_data_point():
+    # Replace with logic to fetch or generate live data point
+    return random.random()
+
+
+## js code 
+
+// src/components/LiveStockChart.jsx
+
+import React, { useEffect, useRef } from 'react';
+import CanvasJSReact from '@canvasjs/react-charts';
+const CanvasJSStockChart = CanvasJSReact.CanvasJSStockChart;
+
+const LiveStockChart = () => {
+    const chartContainerRef = useRef(null);
+
+    useEffect(() => {
+        const chart = new CanvasJSStockChart(chartContainerRef.current, {
+            theme: "light2",
+            title: {
+                text: "Live Data"
+            },
+            charts: [{
+                axisX: {
+                    title: "Time",
+                    valueFormatString: "HH:mm:ss"
+                },
+                axisY: {
+                    title: "Value"
+                },
+                data: [{
+                    type: "line",
+                    xValueType: "dateTime",
+                    dataPoints: []
+                }]
+            }],
+            navigator: {
+                slider: {
+                    minimum: new Date().getTime(),
+                    maximum: new Date().getTime() + 60000
+                }
+            }
+        });
+
+        chart.render();
+
+        const eventSource = new EventSource('http://localhost:8000/events/');
+
+        eventSource.onmessage = function (event) {
+            const newData = JSON.parse(event.data);
+            chart.options.charts[0].data[0].dataPoints.push({
+                x: new Date(newData.x * 1000),
+                y: newData.y
+            });
+
+            if (chart.options.charts[0].data[0].dataPoints.length > 100) {
+                chart.options.charts[0].data[0].dataPoints.shift();
+            }
+
+            chart.navigator.slider.minimum = chart.options.charts[0].data[0].dataPoints[0].x;
+            chart.navigator.slider.maximum = chart.options.charts[0].data[0].dataPoints[chart.options.charts[0].data[0].dataPoints.length - 1].x;
+
+            chart.render();
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, []);
+
+    return <div ref={chartContainerRef} style={{ height: "400px", width: "100%" }} />;
+};
+
+export default LiveStockChart;
+
+
+// src/App.jsx
+
+import React from 'react';
+import LiveStockChart from './components/LiveStockChart';
+
+const App = () => {
+    return (
+        <div className="App">
+            <LiveStockChart />
+        </div>
+    );
+};
+
+export default App;

@@ -1,0 +1,6 @@
+#mainNav {
+    background-image: url('./assets/bg3.jpeg');
+    background-repeat:  repeat;
+    background-size: contain;
+    background-position: left;
+}
